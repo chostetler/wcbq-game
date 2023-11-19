@@ -1,5 +1,4 @@
 from django.db import models
-import re
 
 # Create your models here.
 
@@ -30,7 +29,7 @@ class Question(models.Model):
         else:
             return self.question_text
     def guess_string_correct(self, guess:str):
-        for answer in self.answers.all():
+        for answer in self.answers:
             if answer.matches_guess_string(guess):
                 return True
         return False
@@ -42,10 +41,10 @@ class Answer(models.Model):
     def matches_guess_string(self, guess: str):
         keywords = set(re.findall(r'\b\w+\b', self.text.upper()))
         guesswords = set(re.findall(r'\b\w+\b', guess.upper()))
-        matches = keywords.intersection(guesswords)
+        matches = union(keywords, guesswords)
         if len(keywords)*0.66 <= len(matches):
             return len(guesswords) <= len(keywords) * 3
-        return False
+        return false
 
     def __str__(self):
         return self.text
