@@ -12,7 +12,7 @@ class BibleVerse(models.Model):
     chapter = models.PositiveIntegerField()
     verse = models.PositiveIntegerField()
     text = models.TextField()
-    version = models.ForeignKey(BibleVersion, on_delete=models.CASCADE, related_name='verses')
+    version = models.ForeignKey(BibleVersion, on_delete=models.CASCADE, related_name='verses', blank=True, null=True)
 
     def __str__(self):
         return f'{self.book} {self.chapter}:{self.verse}'
@@ -20,15 +20,19 @@ class BibleVerse(models.Model):
 # Represents a single question
 class Question(models.Model):
     question_text = models.CharField(max_length=255)
-    answer_text = models.CharField(max_length=255)
-    pub_date = models.DateTimeField('date published')
-    verse = models.ForeignKey(BibleVerse, on_delete=models.CASCADE, related_name='questions')
+    pub_date = models.DateTimeField('date published', auto_now_add=True)
+    verse = models.ForeignKey(BibleVerse, on_delete=models.CASCADE, related_name='questions', blank=True, null=True)
 
     def __str__(self):
         if len(self.question_text)>100:
             return f'{self.question_text[0:97]}...'
         else:
             return self.question_text
+    def guess_string_correct(self, guess:str):
+        for answer in self.answers:
+            if answer.matches_guess_string(guess):
+                return True
+        return False
 
 class Answer(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='answers')
